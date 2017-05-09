@@ -46,7 +46,7 @@ class Automattic_Podcasting {
 	 *
 	 * @uses podcasting/customize-feed.php
 	 */
-	function podcasting_custom_feed() {
+	static function podcasting_custom_feed() {
 		if ( is_feed() && is_category( get_option( 'podcasting_archive' ) ) ) {
 			require_once plugin_dir_path( __FILE__ ) . 'podcasting/customize-feed.php';
 		}
@@ -56,7 +56,7 @@ class Automattic_Podcasting {
 	 * Ensure that theme support for post thumbnails exists.
 	 * We will be using these for episode-level feed images.
 	 */
-	function podcasting_add_post_thumbnail_support() {
+	static function podcasting_add_post_thumbnail_support() {
 		add_theme_support( 'post-thumbnails' );
 	}
 
