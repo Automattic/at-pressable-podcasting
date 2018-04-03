@@ -47,7 +47,7 @@ class Automattic_Podcasting {
 	 * @uses podcasting/customize-feed.php
 	 */
 	static function podcasting_custom_feed() {
-		if ( is_feed() && is_category( self::podcasting_get_podcasting_category_id() ) {
+		if ( is_feed() && is_category( self::podcasting_get_podcasting_category_id() ) ) {
 			require_once plugin_dir_path( __FILE__ ) . 'podcasting/customize-feed.php';
 		}
 	}
