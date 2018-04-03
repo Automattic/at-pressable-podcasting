@@ -17,9 +17,13 @@ class Podcast_Widget extends WP_Widget {
 	}
 
 	function widget( $args, $instance ) {
-		$podcast_category = get_option( 'podcasting_archive' );
+		if ( ! Automattic_Podcasting::podcasting_is_enabled() ) {
+			return;
+		}
 
-		if ( empty( $podcast_category ) ) {
+		$podcast_category = get_category( Automattic_Podcasting::podcasting_get_podcasting_category_id() );
+
+		if ( empty( $podcast_category ) || empty( $podcast_category->slug ) ) {
 			return;
 		}
 
@@ -38,7 +42,7 @@ class Podcast_Widget extends WP_Widget {
 		if ( ! empty( $instance['itunes_feed_id'] ) ) {
 			$subscribe_url = 'http://www.itunes.com/podcast?id=' . urlencode( $instance['itunes_feed_id'] );
 		} else {
-			$subscribe_url = 'itpc://' . str_replace( 'http://', '', site_url( '/category/' . esc_attr( $podcast_category ) . '/feed/', 'http' ) );
+			$subscribe_url = 'itpc://' . str_replace( 'http://', '', site_url( '/category/' . esc_attr( $podcast_category->slug ) . '/feed/', 'http' ) );
 		}
 
 		if ( ! empty( $podcast_title ) ) {

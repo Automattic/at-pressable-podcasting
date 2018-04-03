@@ -15,8 +15,8 @@ function podcasting_customization_init() {
 
 	add_settings_section( 'podcasting_customization', esc_html__( 'Podcasting' ), 'podcasting_customization_callback', 'media' );
 
-	add_settings_field( 'podcasting_archive', esc_html__( 'Category to set as feed' ), 'podcasting_archive_callback', 'media', 'podcasting_customization' );
-	register_setting( 'media', 'podcasting_archive', 'esc_html' );
+	add_settings_field( 'podcasting_category_id', esc_html__( 'Category to set as feed' ), 'podcasting_category_id_callback', 'media', 'podcasting_customization' );
+	register_setting( 'media', 'podcasting_category_id', 'esc_html' );
 
 	if ( Automattic_Podcasting::podcasting_is_enabled() ) {
 		add_settings_field( 'podcasting_title', esc_html__( 'Podcast title' ), 'podcasting_title_callback', 'media', 'podcasting_customization' );
@@ -65,33 +65,35 @@ function podcasting_customization_callback() {
 /**
  * Set the category to use for podcast archive
  */
-function podcasting_archive_callback() {
+function podcasting_category_id_callback() {
 	$args = array( 'hide_empty' => 0 );
 	$categories = get_categories( $args );
-	$archive = get_option( 'podcasting_archive', false );
+	$category_ID = Automattic_Podcasting::podcasting_get_podcasting_category_id();
 
 	echo '<fieldset><legend class="screen-reader-text"><span>' . __('Blog category for podcasts') . '</span></legend>';
-	echo '<select name="podcasting_archive" id="podcasting_archive">';
-	if ( ! $archive ) {
+	echo '<select name="podcasting_category_id" id="podcasting_category_id">';
+	if ( ! $category_ID ) {
 		echo '<option value="0">' . __( 'Select podcast category:' ) . '</option>';
 	} else {
 		echo '<option value="0">' . __( 'None' ) . '</option>';
 	}
 
 	foreach ( $categories as $category ) {
-		echo "<option value='" . esc_attr( $category->category_nicename ) . "' " . selected( $archive, $category->category_nicename, false ) . ">" . esc_html( $category->name ) . '</option>';
+		echo "<option value='" . esc_attr( $category->cat_ID ) . "' " . selected( $category_ID, $category->cat_ID, false ) . ">" . esc_html( $category->name ) . '</option>';
 	}
 	echo '</select>';
 
-	if ( $archive ) {
+	if ( $category_ID ) {
 		$url = false;
-		$term = get_term_by( 'slug', $archive, 'category' );
-		if ( isset( $term->term_id ) )
+		$term = get_term_by( 'id', $category_ID, 'category' );
+		if ( isset( $term->term_id ) ) {
 			$url = get_category_feed_link( $term->term_id );
+		}
 
-		if ( $url )
-			echo '<p class="howto">' . sprintf( __( 'Your podcast feed: %1$s' ), '<a href="' . esc_url( $url ) . '">' . esc_url( $url ) . '</a>' ) . '<br>';
-			echo __('This is the URL you submit to iTunes or podcasting service.') . '</p>';
+		if ( $url ) {
+			echo '<p class="howto">' . sprintf( __( 'Your podcast feed: %1$s' ), '<a href="' . esc_url( $url ) . '">' . esc_url( $url ) . '</a>' ) . '</p>';
+			echo '<p class="howto">' . __( 'This is the URL you submit to iTunes or podcasting service.' ) . '</p>';
+		}
 	}
 
 	echo '</fieldset>';
@@ -104,7 +106,7 @@ function podcasting_title_callback() {
 	$title = get_option( 'podcasting_title', '' );
 	if ( empty( $title ) ) {
 		$title = get_bloginfo( 'name' );
-		$category = get_category_by_slug( get_option( 'podcasting_archive' ) );
+		$category = get_category( Automattic_Podcasting::podcasting_get_podcasting_category_id() );
 		$title = "$title &#187; {$category->name}";
 	}
 

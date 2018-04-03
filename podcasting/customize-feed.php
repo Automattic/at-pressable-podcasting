@@ -10,8 +10,8 @@ function podcasting_bloginfo_rss_name( $output ) {
 	$title = get_option( 'podcasting_title' );
 	if ( empty( $title ) ) {
 		$title = get_bloginfo( 'name' );
-		$category = get_category_by_slug( get_option( 'podcasting_archive' ) );
-		$title = "$title &#187; {$category->name}";
+		$category = get_category( Automattic_Podcasting::podcasting_get_podcasting_category_id() );
+		$output = "$title &#187; {$category->name}";
 	} else {
 		$output = $title;
 	}
