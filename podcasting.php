@@ -47,7 +47,7 @@ class Automattic_Podcasting {
 	 * @uses podcasting/customize-feed.php
 	 */
 	static function podcasting_custom_feed() {
-		if ( is_feed() && is_category( get_option( 'podcasting_archive' ) ) ) {
+		if ( is_feed() && is_category( self::podcasting_get_podcasting_category_id() ) ) {
 			require_once plugin_dir_path( __FILE__ ) . 'podcasting/customize-feed.php';
 		}
 	}
@@ -61,6 +61,35 @@ class Automattic_Podcasting {
 	}
 
 	/**
+	 * Returns the ID of the category used for podcasting (if any).
+	 */
+	static function podcasting_get_podcasting_category_id() {
+		$cat_ID = get_option( 'podcasting_category_id', false );
+
+		if ( false !== $cat_ID ) {
+			$category = get_category( $cat_ID );
+			if ( ! $category || ! isset( $category->term_id ) ) {
+				return false;
+			}
+			return (int) $category->term_id;
+		}
+
+		$category_archive = get_option( 'podcasting_archive', false );
+
+		if ( false === $category_archive ) {
+			return false;
+		}
+
+		$category = get_term_by( 'slug', $category_archive, 'category' );
+
+		if ( ! $category || ! isset( $category->term_id ) ) {
+			return false;
+		}
+
+		return (int) $category->term_id;
+	}
+
+	/**
 	 * Is podcasting enabled?
 	 *
 	 * If the user has chosen a category for their podcast feed
@@ -69,6 +98,6 @@ class Automattic_Podcasting {
 	 * @return bool
 	 */
 	static function podcasting_is_enabled() {
-		return (bool) get_option( 'podcasting_archive', false );
+		return (bool) self::podcasting_get_podcasting_category_id();
 	}
 }
