@@ -69,7 +69,7 @@ class Podcast_Widget extends WP_Widget {
 		echo '<p><a href="' . $subscribe_url . '">Subscribe via iTunes</a></p>';
 
 		echo $args['after_widget'];
-		stats_extra( 'widget_view', 'podcasting' );
+		do_action( 'jetpack_stats_extra', 'widget_view', 'podcasting' );
 	}
 
 	function form( $instance ) {
