@@ -48,6 +48,12 @@ function podcasting_feed_head() {
 		echo '<itunes:author>' . esc_html( strip_tags( $author ) ) . "</itunes:author>\n";
 	}
 
+	$email = get_option( 'podcasting_email' );
+
+	if ( ! empty( $email ) ) {
+		echo '<itunes:email>' . esc_html( strip_tags ( $email ) ) . "</itunes:email>\n";
+	}
+
 	$copyright = get_option( 'podcasting_copyright' );
 
 	if ( !empty( $copyright ) ) {
