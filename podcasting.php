@@ -16,6 +16,8 @@ class Automattic_Podcasting {
 			require_once plugin_dir_path( __FILE__ ) . 'podcasting/settings.php';
 		}
 
+		require_once plugin_dir_path( __FILE__ ) . 'podcasting/settings-rest-api.php';
+
 		if ( self::podcasting_is_enabled() ) {
 			add_action( 'after_setup_theme', array( 'Automattic_Podcasting', 'podcasting_add_post_thumbnail_support' ), 20 ); // Later then themes normally do.
 			remove_action( 'rss2_head', 'rss2_blavatar' );
