@@ -8,12 +8,13 @@ class Automattic_Podcasting_Settings_REST_API {
 		$settings['podcasting_summary']      = (string) get_option( 'podcasting_summary', '' );
 		$settings['podcasting_copyright']    = (string) get_option( 'podcasting_copyright', '' );
 		$settings['podcasting_explicit']     = (string) get_option( 'podcasting_explicit', 'no' );
-		$settings['podcasting_image']        = (string) get_option( 'podcasting_image', '' );
+		$settings['podcasting_image']        = (string) Automattic_Podcasting::podcasting_get_image_url();
 		$settings['podcasting_keywords']     = (string) get_option( 'podcasting_keywords', '' );
 		$settings['podcasting_category_1']   = (string) get_option( 'podcasting_category_1', '' );
 		$settings['podcasting_category_2']   = (string) get_option( 'podcasting_category_2', '' );
 		$settings['podcasting_category_3']   = (string) get_option( 'podcasting_category_3', '' );
 		$settings['podcasting_email']        = (string) get_option( 'podcasting_email', '' );
+		$settings['podcasting_image_id']     = (int) get_option( 'podcasting_image_id', 0 );
 
 		return $settings;
 	}
@@ -35,6 +36,7 @@ class Automattic_Podcasting_Settings_REST_API {
 			'podcasting_category_2'  => 'string',
 			'podcasting_category_3'  => 'string',
 			'podcasting_email'       => 'string',
+			'podcasting_image_id'    => 'int',
 		);
 		
 		foreach( $cast_map as $key => $type ) {
