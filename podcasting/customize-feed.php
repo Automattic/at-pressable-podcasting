@@ -72,9 +72,13 @@ function podcasting_feed_head() {
 
 	echo "</itunes:explicit>\n";
 
-	$image = get_option( 'podcasting_image' );
+	$image = Automattic_Podcasting::podcasting_get_image_url();
 
 	if ( ! empty( $image ) ) {
+		if ( function_exists( 'jetpack_photon_url' ) ) {
+			$image = jetpack_photon_url( $image, array( 'fit' => '3000,3000' ), 'https' );
+		}
+
 		echo "<itunes:image href='" . esc_url( $image ) . "' />\n";
 	}
 

@@ -63,6 +63,18 @@ class Automattic_Podcasting {
 	}
 
 	/**
+	 * Returns the URL of the image used for podcasting (if any).
+	 */
+	static function podcasting_get_image_url() {
+		$image_id = get_option( 'podcasting_image_id', false );
+		if ( $image_id && is_numeric( $image_id ) && wp_attachment_is_image( $image_id ) ) {
+			return wp_get_attachment_url( $image_id );
+		} else {
+			return get_option( 'podcasting_image', '' );
+		}
+	}
+
+	/**
 	 * Returns the ID of the category used for podcasting (if any).
 	 */
 	static function podcasting_get_podcasting_category_id() {
