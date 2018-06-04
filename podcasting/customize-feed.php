@@ -139,8 +139,6 @@ function podcasting_feed_item() {
 			if ( is_array( $image ) ) {
 				$image = $image[0];
 			}
-			// iTunes barfs on https images, so force http here.
-			$image = str_replace( 'https://', 'http://', $image );
 			echo "<itunes:image href='" . esc_url( $image ) . "' />\n";
 		}
 	}
@@ -164,7 +162,7 @@ function podcasting_feed_item() {
 	echo "<itunes:subtitle>" . esc_html( $subtitle ) . "</itunes:subtitle>\n";
 
 	if ( ! empty( $post_meta['enclosure'] ) ) {
-		echo "<enclosure url='" . esc_url( str_replace( 'https://', 'http://', $post_meta['enclosure']['url'] ) ) . "' length='" . esc_html( $post_meta['enclosure']['length'] ) . "' type='" . esc_html( $post_meta['enclosure']['mime'] ) . "' />\n";
+		echo "<enclosure url='" . esc_url( $post_meta['enclosure']['url'] ) . "' length='" . esc_html( $post_meta['enclosure']['length'] ) . "' type='" . esc_html( $post_meta['enclosure']['mime'] ) . "' />\n";
 	}
 
 	// TODO <itunes:duration>7:10</itunes:duration>; iTunes seems to figure this out on it's own. Would be nice to have in the future
