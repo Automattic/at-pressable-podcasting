@@ -23,7 +23,7 @@ add_filter( 'wp_title_rss', 'podcasting_bloginfo_rss_name' );
 
 function podcasting_feed_head() {
 	$subtitle = get_option( 'podcasting_subtitle' );
-	
+
 	if ( empty( $subtitle ) ) {
 		$subtitle = get_bloginfo( 'description' );
 	}
@@ -114,9 +114,9 @@ function podcasting_feed_item() {
 
 	$post_meta = get_post_meta( $post->ID, 'podcast_episode', true );
 
-	$author = get_option( 'podcasting_talent_name' );
+	$author = get_the_author();
 	if ( empty( $author ) ) {
-		$author = get_the_author();
+		$author = get_option( 'podcasting_talent_name' );
 	}
 
 	echo "<itunes:author>" . esc_html( $author ) . "</itunes:author>\n";
@@ -148,12 +148,8 @@ function podcasting_feed_item() {
 		echo '<itunes:keywords>' . esc_html( $keywords ) . "</itunes:keywords>\n";
 	}
 
-	if ( has_excerpt() ) {
-		$excerpt = get_the_excerpt();
-	} else {
-		$excerpt = get_option( 'podcasting_summary' );
-	}
-	$excerpt = apply_filters( 'the_excerpt_rss', $excerpt );
+	// Summary fallback order: custom excerpt > auto-generated post excerpt > empty string.
+	$excerpt = apply_filters( 'the_excerpt_rss', get_the_excerpt() );
 
 	echo "<itunes:summary>" . esc_html( strip_tags( $excerpt ) ) . "</itunes:summary>\n";
 
