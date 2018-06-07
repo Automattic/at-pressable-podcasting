@@ -21,6 +21,15 @@ function podcasting_bloginfo_rss_name( $output ) {
 
 add_filter( 'wp_title_rss', 'podcasting_bloginfo_rss_name' );
 
+function podcasting_modify_default_feed_description( $value, $field ) {
+	if ( $field === 'description' ) {
+		return get_option( 'podcasting_summary', '' );
+	}
+	return $value;
+}
+
+add_filter( 'bloginfo_rss', 'podcasting_modify_default_feed_description', 10, 2 );
+
 function podcasting_feed_head() {
 	$subtitle = get_option( 'podcasting_subtitle' );
 
@@ -33,10 +42,6 @@ function podcasting_feed_head() {
 	}
 
 	$summary = get_option( 'podcasting_summary' );
-
-	if ( empty( $summary ) ) {
-		$summary = get_bloginfo( 'description' );
-	}
 
 	if ( ! empty( $summary ) ) {
 		echo '<itunes:summary>' . esc_html( strip_tags( $summary ) ) . "</itunes:summary>\n";
