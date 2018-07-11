@@ -56,7 +56,9 @@ function podcasting_feed_head() {
 	$email = get_option( 'podcasting_email' );
 
 	if ( ! empty( $email ) ) {
+		echo '<itunes:owner>';
 		echo '<itunes:email>' . esc_html( strip_tags ( $email ) ) . "</itunes:email>\n";
+		echo '</itunes:owner>';
 	}
 
 	$copyright = get_option( 'podcasting_copyright' );
