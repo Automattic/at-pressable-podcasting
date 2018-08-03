@@ -34,16 +34,6 @@ class Automattic_Podcasting {
 	}
 
 	/**
-	 * Load the code for the Podcasting meta box on Edit/New Post
-	 *
-	 */
-	function podcasting_load_post_meta_box_code() {
-		if ( self::podcasting_is_enabled() ) {
-			require_once plugin_dir_path( __FILE__ ) . 'podcasting/post-meta-box.php';
-		}
-	}
-
-	/**
 	 * Load the file containing iTunes specific feed hooks.
 	 *
 	 * @uses podcasting/customize-feed.php
