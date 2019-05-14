@@ -50,10 +50,15 @@ class Podcast_Widget extends WP_Widget {
 		}
 
 		if ( ! empty( $podcast_image ) ) {
+			$podcast_srcset = $podcast_image;
 			if ( function_exists( 'jetpack_photon_url' ) ) {
-				$podcast_image = jetpack_photon_url( $podcast_image, array( 'fit' => '300,300' ), 'https' );
+				$podcast_image  = jetpack_photon_url( $podcast_image, array( 'fit' => '300,300' ), 'https' );
+				$podcast_srcset =
+					esc_url( jetpack_photon_url( $podcast_image, array( 'fit' => '150,150' ), 'https' ) ) . ', ' .
+					esc_url( jetpack_photon_url( $podcast_image, array( 'fit' => '300,300' ), 'https' ) ) . ' 2x, ' .
+					esc_url( jetpack_photon_url( $podcast_image, array( 'fit' => '450,450' ), 'https' ) ) . ' 3x';
 			}
-			echo '<a href="' . $subscribe_url . '"><img src="' . esc_url( $podcast_image ) . '" /></a>';
+			echo '<a href="' . $subscribe_url . '"><img src="' . esc_url( $podcast_image ) . '" srcset="' . $podcast_srcset . '" /></a>';
 		}
 
 		if ( ! empty( $podcast_subtitle ) ) {
