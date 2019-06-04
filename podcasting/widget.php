@@ -37,7 +37,8 @@ class Podcast_Widget extends WP_Widget {
 		$podcast_subtitle  = get_option( 'podcasting_subtitle'  );
 		$podcast_summary   = get_option( 'podcasting_summary'   );
 		$podcast_copyright = get_option( 'podcasting_copyright' );
-		$podcast_image     = get_option( 'podcasting_image'     );
+		$podcast_image_url = Automattic_Podcasting::podcasting_get_image_url();
+		$podcast_image_id  = get_option( 'podcasting_image_id' , false );
 
 		if ( ! empty( $instance['itunes_feed_id'] ) ) {
 			$subscribe_url = 'http://www.itunes.com/podcast?id=' . urlencode( $instance['itunes_feed_id'] );
@@ -49,16 +50,20 @@ class Podcast_Widget extends WP_Widget {
 			echo '<h3 class="podcast_title">' . esc_html( $podcast_title ) . '</h3>';
 		}
 
-		if ( ! empty( $podcast_image ) ) {
-			$podcast_srcset = $podcast_image;
+		if ( ! empty( $podcast_image_url ) ) {
 			if ( function_exists( 'jetpack_photon_url' ) ) {
-				$podcast_image  = jetpack_photon_url( $podcast_image, array( 'fit' => '300,300' ), 'https' );
-				$podcast_srcset =
-					esc_url( jetpack_photon_url( $podcast_image, array( 'fit' => '150,150' ), 'https' ) ) . ', ' .
-					esc_url( jetpack_photon_url( $podcast_image, array( 'fit' => '300,300' ), 'https' ) ) . ' 2x, ' .
-					esc_url( jetpack_photon_url( $podcast_image, array( 'fit' => '450,450' ), 'https' ) ) . ' 3x';
+				$podcast_image_url = jetpack_photon_url( $podcast_image_url, array( 'fit' => '300,300' ), 'https' );
 			}
-			echo '<a href="' . $subscribe_url . '"><img src="' . esc_url( $podcast_image ) . '" srcset="' . $podcast_srcset . '" /></a>';
+			echo '<a href="' . $subscribe_url . '">';
+			echo '<img src="' . esc_url( $podcast_image_url ) . '"';
+			if ( $podcast_image_id && is_numeric( $podcast_image_id ) && wp_attachment_is_image( $podcast_image_id ) ) {
+				echo ' srcset="' . wp_calculate_image_srcset(
+					array( 300, 300 ),
+					$podcast_image_url,
+					wp_get_attachment_metadata( $podcast_image_id )
+				) . '"';
+			}
+			echo ' /></a>';
 		}
 
 		if ( ! empty( $podcast_subtitle ) ) {
