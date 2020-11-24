@@ -1,6 +1,6 @@
 {
   "name": "automattic/at-pressable-podcasting",
-  "version": "v1.2.5",
+  "version": "v1.2.6",
   "autoload": {
     "files": [ "podcasting.php" ]
   }
