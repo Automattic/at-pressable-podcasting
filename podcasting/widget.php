@@ -29,7 +29,8 @@ class Podcast_Widget extends WP_Widget {
 
 		echo $args['before_widget'];
 
-		$title = apply_filters( 'widget_title', $instance['title'] );
+		$title = isset( $instance['title'] ) ? $instance['title'] : '';
+		$title = apply_filters( 'widget_title', $title );
 		if ( ! empty( $title ) )
 			echo $args['before_title'] . $title . $args['after_title'];
 
@@ -40,7 +41,7 @@ class Podcast_Widget extends WP_Widget {
 		$podcast_image     = get_option( 'podcasting_image'     );
 
 		if ( ! empty( $instance['itunes_feed_id'] ) ) {
-			$subscribe_url = 'http://www.itunes.com/podcast?id=' . urlencode( $instance['itunes_feed_id'] );
+			$subscribe_url = 'https://podcasts.apple.com/podcast/id' . urlencode( $instance['itunes_feed_id'] );
 		} else {
 			$subscribe_url = 'itpc://' . str_replace( 'http://', '', site_url( '/category/' . esc_attr( $podcast_category->slug ) . '/feed/', 'http' ) );
 		}
