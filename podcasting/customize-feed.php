@@ -89,12 +89,6 @@ function podcasting_feed_head() {
 		echo "<itunes:image href='" . esc_url( $image ) . "' />\n";
 	}
 
-	$keywords = get_option( 'podcasting_keywords' );
-
-	if ( ! empty( $keywords ) ) {
-		echo '<itunes:keywords>' . esc_html( $keywords ) . "</itunes:keywords>\n";
-	}
-
 	$category_1 = podcasting_generate_category( 'podcasting_category_1' );
 
 	if ( ! empty( $category_1 ) ) {
@@ -113,13 +107,10 @@ function podcasting_feed_head() {
 		echo $category_3;
 	}
 }
-
 add_action( 'rss2_head', 'podcasting_feed_head' );
 
 function podcasting_feed_item() {
 	global $post;
-
-	$post_meta = get_post_meta( $post->ID, 'podcast_episode', true );
 
 	$author = get_the_author();
 	if ( empty( $author ) ) {
@@ -150,11 +141,6 @@ function podcasting_feed_item() {
 		}
 	}
 
-	$keywords = '';
-	if ( ! empty( $keywords ) ) {
-		echo '<itunes:keywords>' . esc_html( $keywords ) . "</itunes:keywords>\n";
-	}
-
 	// Summary fallback order: custom excerpt > auto-generated post excerpt > empty string.
 	$excerpt = apply_filters( 'the_excerpt_rss', get_the_excerpt() );
 
@@ -163,28 +149,33 @@ function podcasting_feed_item() {
 	$subtitle = wp_trim_words( $excerpt, 10, '&#8230;' );
 
 	echo "<itunes:subtitle>" . esc_html( $subtitle ) . "</itunes:subtitle>\n";
-
-	if ( ! empty( $post_meta['enclosure'] ) ) {
-		echo "<enclosure url='" . esc_url( $post_meta['enclosure']['url'] ) . "' length='" . esc_html( $post_meta['enclosure']['length'] ) . "' type='" . esc_html( $post_meta['enclosure']['mime'] ) . "' />\n";
-	}
-
-	// TODO <itunes:duration>7:10</itunes:duration>; iTunes seems to figure this out on it's own. Would be nice to have in the future
 }
-
 add_action( 'rss2_item', 'podcasting_feed_item' );
 
+/**
+ * Adds the `<itunes:duration>` tag to each RSS enclosure.
+ * @return string The supplied enclosure or the supplied enclosure with appended duration
+ */
 function podcasting_rss_enclosure( $enclosure ) {
-	global $post;
+	preg_match( '/url="([^"]*)"/i', $enclosure, $result );
 
-	$post_meta = get_post_meta( $post->ID, 'podcast_episode', true );
+	if ( $result ) {
+		$attachment_id = attachment_url_to_postid( $result[1] );
 
-	if ( empty( $post_meta['enclosure'] ) ) {
-		return $enclosure;
+		if ( 0 === $attachment_id ) {
+			return $enclosure;
+		}
+
+		$metadata = wp_get_attachment_metadata( $attachment_id );
+		$duration = absint( $metadata['length'] );
+
+		if ( 0 !== $duration ) {
+			return $enclosure . '<itunes:duration>' . $duration . "</itunes:duration>\n";
+		}
 	}
 
-	return '';
+	return $enclosure;
 }
-
 add_filter( 'rss_enclosure', 'podcasting_rss_enclosure' );
 
 /**
