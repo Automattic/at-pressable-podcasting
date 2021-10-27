@@ -333,62 +333,59 @@ function podcasting_settings_media_screen() {
 }
 add_action( 'load-options-media.php', 'podcasting_settings_media_screen' );
 
-
-
-
 function podcasting_settings_scripts() {
-?>
-<script>
-jQuery( document ).ready( function( $ ) {
+	?>
+	<script>
+	jQuery( document ).ready( function( $ ) {
 
-	var isPodcastingImage = false;
+		var isPodcastingImage = false;
 
-	$( '#podcasting-image-button' ).click( function( e ) {
-		isPodcastingImage = true;
-		tb_show( '', 'media-upload.php?type=image&post_id=0&TB_iframe=true' );
-		e.preventDefault();
-	} );
+		$( '#podcasting-image-button' ).click( function( e ) {
+			isPodcastingImage = true;
+			tb_show( '', 'media-upload.php?type=image&post_id=0&TB_iframe=true' );
+			e.preventDefault();
+		} );
 
-	window.original_send_to_editor = window.send_to_editor;
+		window.original_send_to_editor = window.send_to_editor;
 
-	window.send_to_editor = function( html ) {
-		var $html  = $( html );
-			source = '';
+		window.send_to_editor = function( html ) {
+			var $html  = $( html );
+				source = '';
 
-		if ( isPodcastingImage ) {
-			if ( $html.is( 'img' ) )
-				source = $html.attr( 'src' );
-			else if ( $html.is( 'a' ) )
-				source = $html.find( 'img' ).attr( 'src' );
+			if ( isPodcastingImage ) {
+				if ( $html.is( 'img' ) )
+					source = $html.attr( 'src' );
+				else if ( $html.is( 'a' ) )
+					source = $html.find( 'img' ).attr( 'src' );
 
-			$( '#podcasting-image-url' ).val( source );
-			$( '#podcasting-image-preview' ).attr( 'src', source ).show();
-			$( '#podcasting-image' ).show();
-			isPodcastingImage = false;
-			tb_remove();
-		} else {
-			window.original_send_to_editor( html );
+				$( '#podcasting-image-url' ).val( source );
+				$( '#podcasting-image-preview' ).attr( 'src', source ).show();
+				$( '#podcasting-image' ).show();
+				isPodcastingImage = false;
+				tb_remove();
+			} else {
+				window.original_send_to_editor( html );
+			}
 		}
-	}
 
-} );
-</script>
-<style>
-#podcasting-image {
-	display: none;
-	width: 200px;
-	height: 200px;
-	text-align: center;
-}
-#podcasting-image.podcasting-image-set {
-	display: block;
-}
-#podcasting-image-preview {
-	max-width: 100%;
-	max-height: 100%;
-}
-</style>
-<?php
+	} );
+	</script>
+	<style>
+	#podcasting-image {
+		display: none;
+		width: 200px;
+		height: 200px;
+		text-align: center;
+	}
+	#podcasting-image.podcasting-image-set {
+		display: block;
+	}
+	#podcasting-image-preview {
+		max-width: 100%;
+		max-height: 100%;
+	}
+	</style>
+	<?php
 }
 
 function podcasting_settings_admin_enqueue_scripts() {

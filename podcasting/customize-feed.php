@@ -2,6 +2,7 @@
 
 function podcasting_xmlns() {
 	echo "\n\t" . 'xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd"' . "\n";
+	echo "\t" . 'xmlns:googleplay="http://www.google.com/schemas/play-podcasts/1.0"' . "\n";
 }
 
 add_action( 'rss2_ns', 'podcasting_xmlns' );
@@ -32,7 +33,6 @@ add_filter( 'bloginfo_rss', 'podcasting_modify_default_feed_description', 10, 2 
 
 function podcasting_feed_head() {
 	$subtitle = get_option( 'podcasting_subtitle' );
-
 	if ( empty( $subtitle ) ) {
 		$subtitle = get_bloginfo( 'description' );
 	}
@@ -42,73 +42,56 @@ function podcasting_feed_head() {
 	}
 
 	$summary = get_option( 'podcasting_summary' );
-
 	if ( ! empty( $summary ) ) {
 		echo '<itunes:summary>' . esc_html( strip_tags( $summary ) ) . "</itunes:summary>\n";
+		echo '<googleplay:description>' . esc_html( strip_tags( $summary ) ) . "</googleplay:description>\n";
 	}
 
 	$author = get_option( 'podcasting_talent_name' );
-
 	if ( ! empty( $author ) ) {
 		echo '<itunes:author>' . esc_html( strip_tags( $author ) ) . "</itunes:author>\n";
+		echo '<googleplay:author>' . esc_html( strip_tags( $author ) ) . "</googleplay:author>\n";
 	}
 
 	$email = get_option( 'podcasting_email' );
-
 	if ( ! empty( $email ) ) {
 		echo '<itunes:owner>';
-		echo '<itunes:email>' . esc_html( strip_tags ( $email ) ) . "</itunes:email>\n";
+		echo '<itunes:email>' . esc_html( strip_tags( $email ) ) . "</itunes:email>\n";
 		echo '</itunes:owner>';
+		echo '<googleplay:owner>' . esc_html( strip_tags( $email ) ) . "</googleplay:owner>\n";
+		echo '<googleplay:email>' . esc_html( strip_tags( $email ) ) . "</googleplay:email>\n";
 	}
 
 	$copyright = get_option( 'podcasting_copyright' );
-
 	if ( !empty( $copyright ) ) {
 		echo '<copyright>' . esc_html( strip_tags( $copyright ) ) . "</copyright>\n";
 	}
 
-	$explicit = get_option( 'podcasting_explicit' );
-
-	echo '<itunes:explicit>';
-
-	if ( empty( $explicit ) ) {
-		echo 'no';
-	} else {
-		echo esc_html( $explicit );
-	}
-
-	echo "</itunes:explicit>\n";
+	$explicit = get_option( 'podcasting_explicit', 'no' );
+	echo '<itunes:explicit>' . esc_html( $explicit ) . "</itunes:explicit>\n";
+	echo '<googleplay:explicit>' . esc_html( $explicit ) . "</googleplay:explicit>\n";
 
 	$image = Automattic_Podcasting::podcasting_get_image_url();
-
 	if ( ! empty( $image ) ) {
 		if ( function_exists( 'jetpack_photon_url' ) ) {
 			$image = jetpack_photon_url( $image, array( 'fit' => '3000,3000' ), 'https' );
 		}
 
 		echo "<itunes:image href='" . esc_url( $image ) . "' />\n";
-	}
-
-	$keywords = get_option( 'podcasting_keywords' );
-
-	if ( ! empty( $keywords ) ) {
-		echo '<itunes:keywords>' . esc_html( $keywords ) . "</itunes:keywords>\n";
+		echo "<googleplay:image href='" . esc_url( $image ) . "' />\n";
 	}
 
 	$category_1 = podcasting_generate_category( 'podcasting_category_1' );
-
 	if ( ! empty( $category_1 ) ) {
 		echo $category_1;
 	}
 
 	$category_2 = podcasting_generate_category( 'podcasting_category_2' );
-
 	if ( ! empty( $category_2 ) ) {
 		echo $category_2;
 	}
 
 	$category_3 = podcasting_generate_category( 'podcasting_category_3' );
-
 	if ( ! empty( $category_3 ) ) {
 		echo $category_3;
 	}
@@ -119,26 +102,16 @@ add_action( 'rss2_head', 'podcasting_feed_head' );
 function podcasting_feed_item() {
 	global $post;
 
-	$post_meta = get_post_meta( $post->ID, 'podcast_episode', true );
-
 	$author = get_the_author();
 	if ( empty( $author ) ) {
 		$author = get_option( 'podcasting_talent_name' );
 	}
+	echo '<itunes:author>' . esc_html( strip_tags( $author ) ) . "</itunes:author>\n";
+	echo '<googleplay:author>' . esc_html( strip_tags( $author ) ) . "</googleplay:author>\n";
 
-	echo "<itunes:author>" . esc_html( $author ) . "</itunes:author>\n";
-
-	$explicit = get_option( 'podcasting_explicit' );
-
-	echo "<itunes:explicit>";
-
-	if ( empty( $explicit ) ) {
-		echo 'no';
-	} else {
-		echo esc_html( $explicit );
-	}
-
-	echo "</itunes:explicit>\n";
+	$explicit = get_option( 'podcasting_explicit', 'no' );
+	echo '<itunes:explicit>' . esc_html( $explicit ) . "</itunes:explicit>\n";
+	echo '<googleplay:explicit>' . esc_html( $explicit ) . "</googleplay:explicit>\n";
 
 	if ( has_post_thumbnail( $post->ID ) ) {
 		$image = wp_get_attachment_image_src( get_post_thumbnail_id( $post->ID ), 'post-thumbnail' );
@@ -147,42 +120,40 @@ function podcasting_feed_item() {
 				$image = $image[0];
 			}
 			echo "<itunes:image href='" . esc_url( $image ) . "' />\n";
+			echo "<googleplay:image href='" . esc_url( $image ) . "' />\n";
 		}
-	}
-
-	$keywords = '';
-	if ( ! empty( $keywords ) ) {
-		echo '<itunes:keywords>' . esc_html( $keywords ) . "</itunes:keywords>\n";
 	}
 
 	// Summary fallback order: custom excerpt > auto-generated post excerpt > empty string.
 	$excerpt = apply_filters( 'the_excerpt_rss', get_the_excerpt() );
+	echo '<itunes:summary>' . esc_html( strip_tags( $excerpt ) ) . "</itunes:summary>\n";
+	echo '<googleplay:description>' . esc_html( strip_tags( $excerpt ) ) . "</googleplay:description>\n";
 
-	echo "<itunes:summary>" . esc_html( strip_tags( $excerpt ) ) . "</itunes:summary>\n";
-
-	$subtitle = wp_trim_words( $excerpt, 10, '&#8230;' );
-
-	echo "<itunes:subtitle>" . esc_html( $subtitle ) . "</itunes:subtitle>\n";
-
-	if ( ! empty( $post_meta['enclosure'] ) ) {
-		echo "<enclosure url='" . esc_url( $post_meta['enclosure']['url'] ) . "' length='" . esc_html( $post_meta['enclosure']['length'] ) . "' type='" . esc_html( $post_meta['enclosure']['mime'] ) . "' />\n";
-	}
-
-	// TODO <itunes:duration>7:10</itunes:duration>; iTunes seems to figure this out on it's own. Would be nice to have in the future
+	// Let podcast players trim the excerpt as needed for the subtitle.
+	echo '<itunes:subtitle>' . esc_html( strip_tags( $excerpt ) ) . "</itunes:subtitle>\n";
 }
 
 add_action( 'rss2_item', 'podcasting_feed_item' );
 
 function podcasting_rss_enclosure( $enclosure ) {
-	global $post;
+	preg_match( '/url="([^"]*)"/i', $enclosure, $result );
 
-	$post_meta = get_post_meta( $post->ID, 'podcast_episode', true );
+	if ( $result ) {
+		$attachment_id = attachment_url_to_postid( $result[1] );
 
-	if ( empty( $post_meta['enclosure'] ) ) {
-		return $enclosure;
+		if ( 0 === $attachment_id ) {
+			return $enclosure;
+		}
+
+		$metadata = wp_get_attachment_metadata( $attachment_id );
+		$duration = absint( $metadata['length'] );
+
+		if ( 0 !== $duration ) {
+			return $enclosure . '<itunes:duration>' . $duration . "</itunes:duration>\n";
+		}
 	}
 
-	return '';
+	return $enclosure;
 }
 
 add_filter( 'rss_enclosure', 'podcasting_rss_enclosure' );
