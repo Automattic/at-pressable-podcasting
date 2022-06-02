@@ -39,6 +39,7 @@ function podcasting_customization_init() {
 
 		add_settings_field( 'podcasting_image', esc_html__( 'Podcast image' ), 'podcasting_image_callback', 'media', 'podcasting_customization' );
 		register_setting( 'media', 'podcasting_image', 'esc_url_raw' );
+		add_action( 'update_option_podcasting_image', 'podcasting_delete_image_id' );
 
 		add_settings_field( 'podcasting_keywords', esc_html__( 'Podcast keywords' ), 'podcasting_keywords_callback', 'media', 'podcasting_customization' );
 		register_setting( 'media', 'podcasting_keywords', 'esc_attr' );
@@ -54,6 +55,14 @@ function podcasting_customization_init() {
 	}
 }
 add_action( 'admin_init', 'podcasting_customization_init' );
+
+/**
+ * Delete podcasting_image_id to avoid override the
+ * new saved podcasting_image value
+ */
+function podcasting_delete_image_id() {
+	delete_option( 'podcasting_image_id' );
+}
 
 /**
  * Fulfill the settings section callback requirement by returning nothing
