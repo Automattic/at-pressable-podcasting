@@ -204,7 +204,7 @@ function podcasting_explicit_callback() {
  * Set the image of the podcast
  */
 function podcasting_image_callback() {
-	$image = get_option( 'podcasting_image', '' );
+	$image = Automattic_Podcasting::podcasting_get_image_url();
 	echo '<fieldset><legend class="screen-reader-text"><span>' . __('Set podcast image') . '</span></legend>';
 	if ( empty( $image ) ) {
 		echo '<div id="podcasting-image"><img id="podcasting-image-preview" src="" alt="" /></div>';
