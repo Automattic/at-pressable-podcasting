@@ -40,7 +40,7 @@ class Podcast_Widget extends WP_Widget {
 		$podcast_subtitle  = get_option( 'podcasting_subtitle'  );
 		$podcast_summary   = get_option( 'podcasting_summary'   );
 		$podcast_copyright = get_option( 'podcasting_copyright' );
-		$podcast_image     = get_option( 'podcasting_image'     );
+		$podcast_image     = Automattic_Podcasting::podcasting_get_image_url();
 
 		if ( ! empty( $podcast_title ) ) {
 			echo '<h3 class="podcast_title">' . esc_html( $podcast_title ) . '</h3>';

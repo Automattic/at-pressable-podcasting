@@ -39,6 +39,7 @@ function podcasting_customization_init() {
 
 		add_settings_field( 'podcasting_image', esc_html__( 'Podcast image' ), 'podcasting_image_callback', 'media', 'podcasting_customization' );
 		register_setting( 'media', 'podcasting_image', 'esc_url_raw' );
+		add_action( 'update_option_podcasting_image', 'podcasting_delete_image_id' );
 
 		add_settings_field( 'podcasting_keywords', esc_html__( 'Podcast keywords' ), 'podcasting_keywords_callback', 'media', 'podcasting_customization' );
 		register_setting( 'media', 'podcasting_keywords', 'esc_attr' );
@@ -54,6 +55,14 @@ function podcasting_customization_init() {
 	}
 }
 add_action( 'admin_init', 'podcasting_customization_init' );
+
+/**
+ * Delete podcasting_image_id to avoid override the
+ * new saved podcasting_image value
+ */
+function podcasting_delete_image_id() {
+	delete_option( 'podcasting_image_id' );
+}
 
 /**
  * Fulfill the settings section callback requirement by returning nothing
@@ -195,7 +204,7 @@ function podcasting_explicit_callback() {
  * Set the image of the podcast
  */
 function podcasting_image_callback() {
-	$image = get_option( 'podcasting_image', '' );
+	$image = Automattic_Podcasting::podcasting_get_image_url();
 	echo '<fieldset><legend class="screen-reader-text"><span>' . __('Set podcast image') . '</span></legend>';
 	if ( empty( $image ) ) {
 		echo '<div id="podcasting-image"><img id="podcasting-image-preview" src="" alt="" /></div>';
