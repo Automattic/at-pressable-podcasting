@@ -28,7 +28,6 @@ function podcasting_modify_default_feed_description( $value, $field ) {
 	}
 	return $value;
 }
-
 add_filter( 'bloginfo_rss', 'podcasting_modify_default_feed_description', 10, 2 );
 
 function podcasting_feed_head() {
@@ -67,7 +66,8 @@ function podcasting_feed_head() {
 		echo '<copyright>' . esc_html( strip_tags( $copyright ) ) . "</copyright>\n";
 	}
 
-	$explicit = get_option( 'podcasting_explicit', 'no' );
+	// Checking against 'yes' because the other two possible values (no and clean) both indicate not explicit content.
+	$explicit = get_option( 'podcasting_explicit', 'no' ) === 'yes' ? 'true' : 'false';
 	echo '<itunes:explicit>' . esc_html( $explicit ) . "</itunes:explicit>\n";
 	echo '<googleplay:explicit>' . esc_html( $explicit ) . "</googleplay:explicit>\n";
 
@@ -96,7 +96,6 @@ function podcasting_feed_head() {
 		echo $category_3;
 	}
 }
-
 add_action( 'rss2_head', 'podcasting_feed_head' );
 
 function podcasting_feed_item() {
@@ -109,7 +108,7 @@ function podcasting_feed_item() {
 	echo '<itunes:author>' . esc_html( strip_tags( $author ) ) . "</itunes:author>\n";
 	echo '<googleplay:author>' . esc_html( strip_tags( $author ) ) . "</googleplay:author>\n";
 
-	$explicit = get_option( 'podcasting_explicit', 'no' );
+	$explicit = get_option( 'podcasting_explicit', 'no' ) === 'yes' ? 'true' : 'false';
 	echo '<itunes:explicit>' . esc_html( $explicit ) . "</itunes:explicit>\n";
 	echo '<googleplay:explicit>' . esc_html( $explicit ) . "</googleplay:explicit>\n";
 
@@ -132,9 +131,12 @@ function podcasting_feed_item() {
 	// Let podcast players trim the excerpt as needed for the subtitle.
 	echo '<itunes:subtitle>' . esc_html( strip_tags( $excerpt ) ) . "</itunes:subtitle>\n";
 }
-
 add_action( 'rss2_item', 'podcasting_feed_item' );
 
+/**
+ * Adds the `<itunes:duration>` tag to each RSS enclosure.
+ * @return string The supplied enclosure or the supplied enclosure with appended duration
+ */
 function podcasting_rss_enclosure( $enclosure ) {
 	preg_match( '/url="([^"]*)"/i', $enclosure, $result );
 
@@ -155,7 +157,6 @@ function podcasting_rss_enclosure( $enclosure ) {
 
 	return $enclosure;
 }
-
 add_filter( 'rss_enclosure', 'podcasting_rss_enclosure' );
 
 /**
