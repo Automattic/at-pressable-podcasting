@@ -31,15 +31,6 @@ function podcasting_modify_default_feed_description( $value, $field ) {
 add_filter( 'bloginfo_rss', 'podcasting_modify_default_feed_description', 10, 2 );
 
 function podcasting_feed_head() {
-	$subtitle = get_option( 'podcasting_subtitle' );
-	if ( empty( $subtitle ) ) {
-		$subtitle = get_bloginfo( 'description' );
-	}
-
-	if ( ! empty( $subtitle ) ) {
-		echo '<itunes:subtitle>' . esc_html( strip_tags( $subtitle ) ) . "</itunes:subtitle>\n";
-	}
-
 	$summary = get_option( 'podcasting_summary' );
 	if ( ! empty( $summary ) ) {
 		echo '<itunes:summary>' . esc_html( strip_tags( $summary ) ) . "</itunes:summary>\n";
@@ -127,9 +118,6 @@ function podcasting_feed_item() {
 	$excerpt = apply_filters( 'the_excerpt_rss', get_the_excerpt() );
 	echo '<itunes:summary>' . esc_html( strip_tags( $excerpt ) ) . "</itunes:summary>\n";
 	echo '<googleplay:description>' . esc_html( strip_tags( $excerpt ) ) . "</googleplay:description>\n";
-
-	// Let podcast players trim the excerpt as needed for the subtitle.
-	echo '<itunes:subtitle>' . esc_html( strip_tags( $excerpt ) ) . "</itunes:subtitle>\n";
 }
 add_action( 'rss2_item', 'podcasting_feed_item' );
 

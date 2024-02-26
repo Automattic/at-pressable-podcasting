@@ -22,9 +22,6 @@ function podcasting_customization_init() {
 		add_settings_field( 'podcasting_title', esc_html__( 'Podcast title' ), 'podcasting_title_callback', 'media', 'podcasting_customization' );
 		register_setting( 'media', 'podcasting_title', 'esc_attr' );
 
-		add_settings_field( 'podcasting_subtitle', esc_html__( 'Podcast subtitle' ), 'podcasting_subtitle_callback', 'media', 'podcasting_customization' );
-		register_setting( 'media', 'podcasting_subtitle', 'esc_attr' );
-
 		add_settings_field( 'podcasting_talent_name', esc_html__( 'Podcast talent name' ), 'podcasting_talent_name_callback', 'media', 'podcasting_customization' );
 		register_setting( 'media', 'podcasting_talent_name', 'esc_attr' );
 
@@ -40,9 +37,6 @@ function podcasting_customization_init() {
 		add_settings_field( 'podcasting_image', esc_html__( 'Podcast image' ), 'podcasting_image_callback', 'media', 'podcasting_customization' );
 		register_setting( 'media', 'podcasting_image', 'esc_url_raw' );
 		add_action( 'update_option_podcasting_image', 'podcasting_delete_image_id' );
-
-		add_settings_field( 'podcasting_keywords', esc_html__( 'Podcast keywords' ), 'podcasting_keywords_callback', 'media', 'podcasting_customization' );
-		register_setting( 'media', 'podcasting_keywords', 'esc_attr' );
 
 		add_settings_field( 'podcasting_category_1', esc_html__( 'Podcast category 1' ), 'podcasting_category_callback', 'media', 'podcasting_customization', 1 );
 		register_setting( 'media', 'podcasting_category_1', 'esc_attr' );
@@ -125,19 +119,6 @@ function podcasting_title_callback() {
 }
 
 /**
- * Set the subtitle of the podcast
- */
-function podcasting_subtitle_callback() {
-	$subtitle = get_option( 'podcasting_subtitle', '' );
-	if ( empty( $subtitle ) )
-		$subtitle = get_bloginfo( 'description' );
-
-	echo '<fieldset><legend class="screen-reader-text"><span>' . __('Set podcast subtitle') . '</span></legend>';
-	echo '<div><input type="text" name="podcasting_subtitle" id="podcasting_subtitle" size="50" value="' . esc_attr( $subtitle ) . '" /></div>';
-	echo '</fieldset>';
-}
-
-/**
  * Set the talent name of the podcast
  */
 function podcasting_talent_name_callback() {
@@ -213,16 +194,6 @@ function podcasting_image_callback() {
 	}
 	echo '<input type="text" id="podcasting-image-url" name="podcasting_image" size="50" value="' . esc_url( $image ) . '" /><br />';
 	echo '<div><em>Minimum size: 1400px &times; 1400px &mdash; maximum size: 2048px &times; 2048px</em></div>';
-	echo '</fieldset>';
-}
-
-/**
- * Set the keywords of the podcast
- */
-function podcasting_keywords_callback() {
-	$keywords = get_option( 'podcasting_keywords', '' );
-	echo '<fieldset><legend class="screen-reader-text"><span>' . __('Set podcast keywords') . '</span></legend>';
-	echo '<div><input type="text" name="podcasting_keywords" id="podcasting_keywords" size="50" value="' . esc_attr( $keywords ) . '" /></div>';
 	echo '</fieldset>';
 }
 

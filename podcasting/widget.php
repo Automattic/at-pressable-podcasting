@@ -37,7 +37,6 @@ class Podcast_Widget extends WP_Widget {
 		}
 
 		$podcast_title     = get_option( 'podcasting_title'     );
-		$podcast_subtitle  = get_option( 'podcasting_subtitle'  );
 		$podcast_summary   = get_option( 'podcasting_summary'   );
 		$podcast_copyright = get_option( 'podcasting_copyright' );
 		$podcast_image     = Automattic_Podcasting::podcasting_get_image_url();
@@ -56,10 +55,6 @@ class Podcast_Widget extends WP_Widget {
 					esc_url( jetpack_photon_url( $podcast_image, array( 'fit' => '450,450' ), 'https' ) ) . ' 3x';
 			}
 			echo '<p class="podcast_image_wrapper"><img class="podcast_image" src="' . esc_url( $podcast_image ) . '" srcset="' . $podcast_srcset . '" /></p>';
-		}
-
-		if ( ! empty( $podcast_subtitle ) ) {
-			echo '<h4 class="podcast_subtitle">' . esc_html( $podcast_subtitle ) . '</h4>';
 		}
 
 		if ( ! empty( $podcast_summary ) ) {
