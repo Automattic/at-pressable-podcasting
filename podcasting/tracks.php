@@ -18,12 +18,17 @@ class Automattic_Podcasting_Tracks {
 		$done = true;
 
 		$instance = new self();
-		add_action( 'transition_post_status', array( $instance, 'record_episode_published' ), 10, 3 );
+		// wp_after_insert_post fires after post, terms, and meta are saved. Required for
+		// Gutenberg/REST publishes where transition_post_status runs before terms are set.
+		add_action( 'wp_after_insert_post', array( $instance, 'record_episode_published' ), 10, 4 );
 		add_action( 'add_attachment', array( $instance, 'record_media_uploaded' ) );
 	}
 
-	public function record_episode_published( $new_status, $old_status, $post ) {
-		if ( 'publish' !== $new_status || 'publish' === $old_status ) {
+	public function record_episode_published( $post_id, $post, $update, $post_before ) {
+		if ( 'publish' !== $post->post_status ) {
+			return;
+		}
+		if ( $post_before && 'publish' === $post_before->post_status ) {
 			return;
 		}
 
@@ -159,31 +164,11 @@ class Automattic_Podcasting_Tracks {
 	}
 
 	/**
-	 * Mirrors the RSS feed's episode definition: audio/video attached to the post, or
-	 * audio/video populated in the `enclosure` post meta (from WP core's do_enclose()).
-	 * WP core accepts both audio and video enclosures — see wp-includes/functions.php do_enclose().
+	 * Requires the post to contain a core/audio or core/video block.
+	 * Cheap string scan via has_block() — no parsing.
 	 */
 	private function has_podcast_media( $post ) {
-		if ( ! empty( get_attached_media( 'audio', $post->ID ) ) ) {
-			return true;
-		}
-		if ( ! empty( get_attached_media( 'video', $post->ID ) ) ) {
-			return true;
-		}
-
-		$enclosures = get_post_meta( $post->ID, 'enclosure', false );
-		foreach ( (array) $enclosures as $enclosure ) {
-			$parts = explode( "\n", trim( (string) $enclosure ) );
-			if ( ! isset( $parts[2] ) ) {
-				continue;
-			}
-			$type = trim( $parts[2] );
-			if ( 0 === strpos( $type, 'audio/' ) || 0 === strpos( $type, 'video/' ) ) {
-				return true;
-			}
-		}
-
-		return false;
+		return has_block( 'core/audio', $post ) || has_block( 'core/video', $post );
 	}
 
 	private function is_first_episode_for_site( $category_id, $current_post_id ) {
