@@ -19,7 +19,7 @@ class Automattic_Podcasting_Tracks {
 
 		$instance = new self();
 		add_action( 'transition_post_status', array( $instance, 'record_episode_published' ), 10, 3 );
-		add_action( 'add_attachment', array( $instance, 'record_audio_uploaded' ) );
+		add_action( 'add_attachment', array( $instance, 'record_media_uploaded' ) );
 	}
 
 	public function record_episode_published( $new_status, $old_status, $post ) {
@@ -52,12 +52,19 @@ class Automattic_Podcasting_Tracks {
 			return;
 		}
 
+		// Match the RSS feed's definition of an episode: must carry an audio or video enclosure.
+		// Without this, a post merely categorized into the podcasting category would fire even
+		// when it has no media — the top offenders pre-filter were posting 50+/day of non-podcast content.
+		if ( ! $this->has_podcast_media( $post ) ) {
+			return;
+		}
+
 		$is_first = $this->is_first_episode_for_site( $category_id, (int) $post->ID );
 		$identity = $this->identity_for_post( $post );
 
 		$this->record_event(
 			$identity,
-			'podcast_episode_published',
+			'wpcom_podcast_episode_published',
 			array(
 				'blog_id'                   => (int) get_current_blog_id(),
 				'post_id'                   => (int) $post->ID,
@@ -66,11 +73,11 @@ class Automattic_Podcasting_Tracks {
 		);
 
 		// add_option() is atomic — only one concurrent caller per site wins the INSERT,
-		// so podcast_show_launched fires exactly once per site.
+		// so wpcom_podcast_show_launched fires exactly once per site.
 		if ( $is_first && add_option( 'podcast_show_launched_tracked', time(), '', false ) ) {
 			$this->record_event(
 				$identity,
-				'podcast_show_launched',
+				'wpcom_podcast_show_launched',
 				array(
 					'blog_id' => (int) get_current_blog_id(),
 					'post_id' => (int) $post->ID,
@@ -79,7 +86,7 @@ class Automattic_Podcasting_Tracks {
 		}
 	}
 
-	public function record_audio_uploaded( $attachment_id ) {
+	public function record_media_uploaded( $attachment_id ) {
 		if ( defined( 'WP_IMPORTING' ) && WP_IMPORTING ) {
 			return;
 		}
@@ -94,13 +101,13 @@ class Automattic_Podcasting_Tracks {
 		}
 
 		$mime_type = get_post_mime_type( $attachment_id );
-		if ( ! $mime_type || 0 !== strpos( $mime_type, 'audio/' ) ) {
+		if ( ! $mime_type || ( 0 !== strpos( $mime_type, 'audio/' ) && 0 !== strpos( $mime_type, 'video/' ) ) ) {
 			return;
 		}
 
 		$this->record_event(
 			wp_get_current_user(),
-			'podcast_audio_uploaded',
+			'wpcom_podcast_media_uploaded',
 			array(
 				'blog_id'       => (int) get_current_blog_id(),
 				'attachment_id' => (int) $attachment_id,
@@ -149,6 +156,34 @@ class Automattic_Podcasting_Tracks {
 		}
 
 		return null;
+	}
+
+	/**
+	 * Mirrors the RSS feed's episode definition: audio/video attached to the post, or
+	 * audio/video populated in the `enclosure` post meta (from WP core's do_enclose()).
+	 * WP core accepts both audio and video enclosures — see wp-includes/functions.php do_enclose().
+	 */
+	private function has_podcast_media( $post ) {
+		if ( ! empty( get_attached_media( 'audio', $post->ID ) ) ) {
+			return true;
+		}
+		if ( ! empty( get_attached_media( 'video', $post->ID ) ) ) {
+			return true;
+		}
+
+		$enclosures = get_post_meta( $post->ID, 'enclosure', false );
+		foreach ( (array) $enclosures as $enclosure ) {
+			$parts = explode( "\n", trim( (string) $enclosure ) );
+			if ( ! isset( $parts[2] ) ) {
+				continue;
+			}
+			$type = trim( $parts[2] );
+			if ( 0 === strpos( $type, 'audio/' ) || 0 === strpos( $type, 'video/' ) ) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	private function is_first_episode_for_site( $category_id, $current_post_id ) {
