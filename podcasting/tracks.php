@@ -36,10 +36,6 @@ class Automattic_Podcasting_Tracks {
 			return;
 		}
 
-		if ( ! $post || empty( $post->ID ) ) {
-			return;
-		}
-
 		if ( function_exists( 'is_headstart_post' ) && is_headstart_post( $post ) ) {
 			return;
 		}
@@ -67,11 +63,13 @@ class Automattic_Podcasting_Tracks {
 		$is_first = $this->is_first_episode_for_site( $category_id, (int) $post->ID );
 		$identity = $this->identity_for_post( $post );
 
+		// blog_id is auto-attached by both tracks_record_event (Simple) and
+		// \Automattic\Jetpack\Tracking (Atomic via Jetpack_Options::get_option('id')).
+		// Passing it here would overwrite Jetpack's connected id with the local one on Atomic.
 		$this->record_event(
 			$identity,
 			'wpcom_podcast_episode_published',
 			array(
-				'blog_id'                   => (int) get_current_blog_id(),
 				'post_id'                   => (int) $post->ID,
 				'is_first_episode_for_site' => (bool) $is_first,
 			)
@@ -84,7 +82,6 @@ class Automattic_Podcasting_Tracks {
 				$identity,
 				'wpcom_podcast_show_launched',
 				array(
-					'blog_id' => (int) get_current_blog_id(),
 					'post_id' => (int) $post->ID,
 				)
 			);
@@ -114,7 +111,6 @@ class Automattic_Podcasting_Tracks {
 			wp_get_current_user(),
 			'wpcom_podcast_media_uploaded',
 			array(
-				'blog_id'       => (int) get_current_blog_id(),
 				'attachment_id' => (int) $attachment_id,
 				'mime_type'     => (string) $mime_type,
 			)
@@ -164,11 +160,45 @@ class Automattic_Podcasting_Tracks {
 	}
 
 	/**
-	 * Requires the post to contain a core/audio or core/video block.
-	 * Cheap string scan via has_block() — no parsing.
+	 * Requires the post to reference audio or video media.
+	 * Matches the methods documented at wordpress.com/support/audio/podcasting/:
+	 * Gutenberg blocks, Classic-editor attachments, or a bare media URL in content.
 	 */
 	private function has_podcast_media( $post ) {
-		return has_block( 'core/audio', $post ) || has_block( 'core/video', $post );
+		// Gutenberg blocks — cheap string scan, no parsing.
+		if (
+			has_block( 'core/audio', $post )
+			|| has_block( 'core/video', $post )
+			|| has_block( 'videopress/video', $post )
+			|| has_block( 'jetpack/videopress', $post )
+		) {
+			return true;
+		}
+
+		// Classic editor: media attached directly to the post.
+		$attached = new WP_Query(
+			array(
+				'post_parent'            => (int) $post->ID,
+				'post_type'              => 'attachment',
+				'post_mime_type'         => array( 'audio', 'video' ),
+				'posts_per_page'         => 1,
+				'fields'                 => 'ids',
+				'no_found_rows'          => true,
+				'update_post_meta_cache' => false,
+				'update_post_term_cache' => false,
+				'suppress_filters'       => true,
+			)
+		);
+		if ( ! empty( $attached->posts ) ) {
+			return true;
+		}
+
+		// Bare media URLs in content (common podcast formats).
+		if ( preg_match( '#https?://\S+\.(mp3|m4a|ogg|wav|mp4|m4v|mov)\b#i', $post->post_content ) ) {
+			return true;
+		}
+
+		return false;
 	}
 
 	private function is_first_episode_for_site( $category_id, $current_post_id ) {
