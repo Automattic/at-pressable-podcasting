@@ -25,6 +25,9 @@ class Automattic_Podcasting_Tracks {
 	}
 
 	public function record_episode_published( $post_id, $post, $update, $post_before ) {
+		if ( ! $post instanceof WP_Post ) {
+			return;
+		}
 		if ( 'publish' !== $post->post_status ) {
 			return;
 		}
