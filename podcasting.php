@@ -12,6 +12,15 @@ function automattic_podcasting_init() {
 
 class Automattic_Podcasting {
 	function __construct() {
+		// Replicate `podcasting_category_id` to WordPress.com via Jetpack Sync.
+		// The wpcom-side Activity Log gate (`Activity_Podcast::post_is_in_podcast_category`)
+		// calls `get_option( 'podcasting_category_id' )` on the replicastore;
+		// without the option in the sync whitelist, the call returns nothing on
+		// Atomic and Jetpack-connected sites and no podcast publishes match.
+		// Registered before the untangle bail so the option syncs regardless of
+		// which podcast layer owns the UI on this site.
+		add_filter( 'jetpack_sync_options_whitelist', array( __CLASS__, 'add_sync_options_whitelist' ) );
+
 		/**
 		 * Stand down on sites where the new automattic/jetpack-podcast
 		 * package owns RSS customization, settings, Tracks, and the
@@ -46,6 +55,18 @@ class Automattic_Podcasting {
 
 			require_once plugin_dir_path( __FILE__ ) . 'podcasting/widget.php';
 		}
+	}
+
+	/**
+	 * Add `podcasting_category_id` to Jetpack Sync's options whitelist so the
+	 * setting replicates from Atomic / Jetpack-connected sites to WordPress.com.
+	 *
+	 * @param array $options Option names allowed to sync.
+	 * @return array Updated option names.
+	 */
+	public static function add_sync_options_whitelist( $options ) {
+		$options[] = 'podcasting_category_id';
+		return array_values( array_unique( $options ) );
 	}
 
 	/**
