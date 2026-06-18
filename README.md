@@ -1,5 +1,7 @@
 # Pressable Podcasting
 
+Deprecated: this is no longer needed. We have fully moved podcasting into Jetpack. The package is being mirrored here - https://github.com/Automattic/jetpack-podcast
+
 This repo is a Wordpress.com plugin that replicates wpcom podcasting behavior.
 It is taken from wpcom codebase and refactored to work with any jetpack site.
 
